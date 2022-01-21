@@ -55,31 +55,37 @@ $QUICK_MODE_TEXT
 =====================
 "
 
-printf -v cxt "IOPS (Read/Write)\n$FMT$FMT$FMT\n"\
-	"Random:" \
-	"$(commaize $RAND_READ_IOPS) / $(commaize $RAND_WRITE_IOPS)" \
-	"Sequential:" \
-	"$(commaize $SEQ_READ_IOPS) / $(commaize $SEQ_WRITE_IOPS)" \
-	"CPU Idleness:" \
-	"$CPU_IDLE_PCT_IOPS%"
+printf -v cxt "IOPS\n$FMT$FMT$FMT$FMT\n" \
+	"Random Read:" \
+	"$(commaize $RAND_READ_IOPS) (sys/usr cpu: $SYS_CPU_PCT_RAND_READ_IOPS% / $USR_CPU_PCT_RAND_READ_IOPS%)" \
+        "Random Write:" \
+	"$(commaize $RAND_WRITE_IOPS) (sys/usr cpu: $SYS_CPU_PCT_RAND_WRITE_IOPS% / $USR_CPU_PCT_RAND_WRITE_IOPS%)" \
+	"Sequential Read:" \
+	"$(commaize $SEQ_READ_IOPS) (sys/usr cpu: $SYS_CPU_PCT_SEQ_READ_IOPS% / $USR_CPU_PCT_SEQ_READ_IOPS%)" \
+        "Sequential Write:" \
+	"$(commaize $SEQ_WRITE_IOPS) (sys/usr cpu: $SYS_CPU_PCT_SEQ_WRITE_IOPS% / $USR_CPU_PCT_SEQ_WRITE_IOPS%)"
 SUMMARY+=$cxt
 
-printf -v cxt "Bandwidth in KiB/sec (Read/Write)\n$FMT$FMT$FMT\n"\
-	"Random:" \
-	"$(commaize $RAND_READ_BW) / $(commaize $RAND_WRITE_BW)" \
-	"Sequential:" \
-	"$(commaize $SEQ_READ_BW) / $(commaize $SEQ_WRITE_BW)" \
-	"CPU Idleness:" \
-	"$CPU_IDLE_PCT_BW%"
+printf -v cxt "Bandwidth in KiB/sec\n$FMT$FMT$FMT$FMT\n"\
+	"Random Read:" \
+        "$(commaize $RAND_READ_BW) (sys/usr cpu: $SYS_CPU_PCT_RAND_READ_BW% / $USR_CPU_PCT_RAND_READ_BW%)" \
+        "Random Write:" \
+        "$(commaize $RAND_WRITE_BW) (sys/usr cpu: $SYS_CPU_PCT_RAND_WRITE_BW% / $USR_CPU_PCT_RAND_WRITE_BW%)" \
+	"Sequential Read:" \
+        "$(commaize $SEQ_READ_BW) (sys/usr cpu: $SYS_CPU_PCT_SEQ_READ_BW% / $USR_CPU_PCT_SEQ_READ_BW%)" \
+        "Sequential Write:" \
+        "$(commaize $SEQ_WRITE_BW) (sys/usr cpu: $SYS_CPU_PCT_SEQ_WRITE_BW% / $USR_CPU_PCT_SEQ_WRITE_BW%)"
 SUMMARY+=$cxt
 
-printf -v cxt "Latency in ns (Read/Write)\n$FMT$FMT$FMT\n"\
-	"Random:" \
-	"$(commaize $RAND_READ_LAT) / $(commaize $RAND_WRITE_LAT)" \
-	"Sequential:" \
-	"$(commaize $SEQ_READ_LAT) / $(commaize $SEQ_WRITE_LAT)" \
-	"CPU Idleness:" \
-	"$CPU_IDLE_PCT_LAT%"
+printf -v cxt "Latency in ns\n$FMT$FMT$FMT$FMT\n"\
+	"Random Read:" \
+        "$(commaize $RAND_READ_LAT) (sys/usr cpu: $SYS_CPU_PCT_RAND_READ_LAT% / $USR_CPU_PCT_RAND_READ_LAT%)" \
+        "Random Write:" \
+        "$(commaize $RAND_WRITE_LAT) (sys/usr cpu: $SYS_CPU_PCT_RAND_WRITE_LAT% / $USR_CPU_PCT_RAND_WRITE_LAT%)" \
+	"Sequential Read:" \
+        "$(commaize $SEQ_READ_LAT) (sys/usr cpu: $SYS_CPU_PCT_SEQ_READ_LAT% / $USR_CPU_PCT_SEQ_READ_LAT%)" \
+        "Sequential Write:" \
+        "$(commaize $SEQ_WRITE_LAT) (sys/usr cpu: $SYS_CPU_PCT_SEQ_WRITE_LAT% / $USR_CPU_PCT_SEQ_WRITE_LAT%)"
 SUMMARY+=$cxt
 
 echo "$SUMMARY" > $RESULT
