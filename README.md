@@ -9,48 +9,54 @@ Various benchmark for storage and Kubernetes.
 =====================
 FIO Benchmark Summary
 For: test_device
-SIZE: 50G
+SIZE: 30G
 QUICK MODE: DISABLED
 =====================
-IOPS (Read/Write)
-        Random:            98368 / 89200
-    Sequential:          108513 / 107636
-  CPU Idleness:                      68%
+IOPS
+        Random Read:           13,154 (sys/usr cpu: 5% / 2%)
+       Random Write:           10,384 (sys/usr cpu: 5% / 2%)
+    Sequential Read:           15,315 (sys/usr cpu: 7% / 2%)
+   Sequential Write:           13,739 (sys/usr cpu: 6% / 2%)
 
-Bandwidth in KiB/sec (Read/Write)
-        Random:          542447 / 514487
-    Sequential:          552052 / 521330
-  CPU Idleness:                      99%
+Bandwidth in KiB/sec
+        Random Read:          632,201 (sys/usr cpu: 3% / 0%)
+       Random Write:          404,138 (sys/usr cpu: 3% / 1%)
+    Sequential Read:          675,536 (sys/usr cpu: 4% / 0%)
+   Sequential Write:          451,400 (sys/usr cpu: 3% / 2%)
 
-Latency in ns (Read/Write)
-        Random:            97222 / 44548
-    Sequential:            40483 / 44690
-  CPU Idleness:                      72%
+Latency in ns
+        Random Read:          186,302 (sys/usr cpu: 4% / 1%)
+       Random Write:          206,968 (sys/usr cpu: 3% / 0%)
+    Sequential Read:          184,324 (sys/usr cpu: 3% / 1%)
+   Sequential Write:          213,935 (sys/usr cpu: 3% / 1%)
 ```
 
 ### Example Result of Comparison Benchmark
 ```
 ================================
 FIO Benchmark Comparsion Summary
-For: 850-pro-raw vs 850-pro-ext4
-SIZE: 50G
+For: Local-Path vs Longhorn
+SIZE: 30G
 QUICK MODE: DISABLED
 ================================
-                             850-pro-raw   vs             850-pro-ext4    :              Change
-IOPS (Read/Write)
-        Random:          96,735 / 89,565   vs          98,135 / 88,990    :      1.45% / -0.64%
-    Sequential:        107,729 / 107,352   vs        110,843 / 107,805    :       2.89% / 0.42%
-  CPU Idleness:                      68%   vs                      66%    :                 -2%
+                                                  Local-Path   vs                                Longhorn    :                                  Change
+IOPS
+       Random Rread:        159,606 (sys/usr cpu: 87% / 10%)   vs           12,882 (sys/usr cpu: 6% / 1%)    :       -91.93% (sys/usr cpu: -81% / -9%)
+       Random Write:        155,267 (sys/usr cpu: 86% / 11%)   vs           10,234 (sys/usr cpu: 5% / 2%)    :       -93.41% (sys/usr cpu: -81% / -9%)
+    Sequential Read:        223,901 (sys/usr cpu: 86% / 12%)   vs           14,532 (sys/usr cpu: 6% / 2%)    :      -93.51% (sys/usr cpu: -80% / -10%)
+   Sequential Write:        205,487 (sys/usr cpu: 86% / 12%)   vs           12,642 (sys/usr cpu: 6% / 2%)    :      -93.85% (sys/usr cpu: -80% / -10%)
 
-Bandwidth in KiB/sec (Read/Write)
-        Random:        549,521 / 519,141   vs        549,610 / 511,755    :      0.02% / -1.42%
-    Sequential:        551,825 / 522,936   vs        552,337 / 520,364    :      0.09% / -0.49%
-  CPU Idleness:                      98%   vs                      98%    :                  0%
+Bandwidth in KiB/sec
+       Random Rread:      14,168,394 (sys/usr cpu: 90% / 9%)   vs          580,274 (sys/usr cpu: 3% / 0%)    :       -95.90% (sys/usr cpu: -87% / -9%)
+       Random Write:      3,029,200 (sys/usr cpu: 24% / 11%)   vs          409,583 (sys/usr cpu: 3% / 1%)    :      -86.48% (sys/usr cpu: -21% / -10%)
+    Sequential Read:      13,811,879 (sys/usr cpu: 89% / 9%)   vs          618,194 (sys/usr cpu: 4% / 0%)    :       -95.52% (sys/usr cpu: -85% / -9%)
+   Sequential Write:      3,025,988 (sys/usr cpu: 24% / 10%)   vs          426,046 (sys/usr cpu: 3% / 2%)    :       -85.92% (sys/usr cpu: -21% / -8%)
 
-Latency in ns (Read/Write)
-        Random:          82,899 / 44,437   vs         114,331 / 45,104    :      37.92% / 1.50%
-    Sequential:          40,335 / 44,767   vs          41,741 / 45,271    :       3.49% / 1.13%
-  CPU Idleness:                      72%   vs                      73%    :                  1%
+Latency in ns
+       Random Rread:          27,769 (sys/usr cpu: 23% / 4%)   vs          215,614 (sys/usr cpu: 3% / 1%)    :       676.46% (sys/usr cpu: -20% / -3%)
+       Random Write:          28,338 (sys/usr cpu: 24% / 4%)   vs          227,289 (sys/usr cpu: 3% / 1%)    :       702.06% (sys/usr cpu: -21% / -3%)
+    Sequential Read:          23,125 (sys/usr cpu: 24% / 4%)   vs          195,626 (sys/usr cpu: 3% / 1%)    :       745.95% (sys/usr cpu: -21% / -3%)
+   Sequential Write:          23,527 (sys/usr cpu: 24% / 4%)   vs          236,478 (sys/usr cpu: 3% / 1%)    :       905.13% (sys/usr cpu: -21% / -3%)
 ```
 
 ### Tweak the options
@@ -68,14 +74,14 @@ For official benchmarking:
 * **Latency**: The total time each request spent in the IO path. *Lower is better.*
     * It's a measurement of how efficient is the storage system to handle each request.
     * The data path overhead of a storage system can be expressed as the latency it added on top of the native storage system (SSD/NVMe).
-* **CPU Idleness**: How idle is the CPU on the node that's running the test. *Higher is better.*
+* **CPU Utilization**: How busy is the CPU spent in kernel (sys) and in user-mode codes (usr) on the node that's running the test. *Lower is better.*
     * It's a measurement of the CPU load/overhead that the storage device has generated.
-    * Notice this is idleness, so if the value is higher, it means the CPUs on that node have more free cycles.
+    * If the value is lower, it means the CPUs on that node have more free cycles.
     * Unforunately at this moment, this measurement cannot reflect the load on the whole cluster for distributed storage systems. But it's still a worthy reference regarding the storage client's CPU load when benchmarking (depends on how distributed storage was architected).
 * For *comparison benchmark*, the `Change` column indicates what's the percentage differences when comparing the second volume to the first volume.
-    * For **IOPS, Bandwidth, CPU Idleness**, positive percentage is better.
-    * For **Latency**, negative percentage is better.
-    * For **CPU Idleness**, instead of showing the percentage of the change, we are showing the difference.
+    * For **IOPS** and **Bandwidth**, positive percentage is better.
+    * For **Latency** and **CPU Utilization**, negative percentage is better.
+    * For **CPU Utilization**, instead of showing the percentage of the change, we are showing the difference.
 
 ### Understanding the result of a distributed storage system
 
@@ -88,8 +94,8 @@ Something is *wrong* when:
 1. You're getting *better write IOPS/bandwidth/latency than local storage*.
 	* It's almost impossible to get better write performance compare to the local storage for a distributed storage solution, unless you have a persistent caching device in front of the local storage.
 	* If you are getting this result, it's likely the storage solution is not crash-consistent, so it doesn't commit the data into the disk before respond, which means in the case of an incident, you might lose data.
-1. You're getting low *CPU Idleness for Latency benchmark* , e.g. <40%.
-	* For **Latency**, the **CPU Idleness** should be at least 40% to guarantee the test won't be impacted by CPU starving.
+1. You're getting higher *CPU Utilization for Latency benchmark* .
+	* High **CPU Utilization** will lead to CPU starvation while running the test.
 	* If this happens, adding more CPUs to the node, or move to a beefer machine.
 
 ### Deploy the FIO benchmark
