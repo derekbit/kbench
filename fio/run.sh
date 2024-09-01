@@ -154,6 +154,7 @@ while [ "$keep_running" == "true" ]; do
         fio $CONFIG_DIR/$IOPS_FIO $IDLE_PROF --filename=$TEST_FILE --size=$TEST_SIZE \
           --output-format=json --output=$TEMP $rate_iops_flag $rate_flag
         mv $TEMP $OUTPUT_IOPS
+        cat $TEMP
     fi
     if [ -n "$BW_FIO" ]; then
         echo Benchmarking $BW_FIO into $OUTPUT_BW
