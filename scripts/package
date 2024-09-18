@@ -5,6 +5,7 @@ source $(dirname $0)/version
 
 cd $(dirname $0)/..
 
+<<<<<<< HEAD
 command -v buildx >/dev/null && BUILD_CMD=(buildx) || BUILD_CMD=(docker buildx)
 
 # read configurable parameters
@@ -57,3 +58,11 @@ echo "Built ${IMAGE}"
 
 mkdir -p ./bin
 echo "${IMAGE}" > ./bin/latest_image
+=======
+TAG=${TAG:-${VERSION}${SUFFIX}}
+REPO=${REPO:-longhornio}
+IMAGE=${REPO}/kbench:${TAG}
+
+docker build -t ${IMAGE} -f package/Dockerfile .
+echo Built ${IMAGE}
+>>>>>>> 4d5d7bd (chore(dockerfile): update fio and base images)
