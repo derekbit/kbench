@@ -3,19 +3,57 @@ set -e
 
 source $(dirname $0)/version
 
-ARCH=${ARCH:-"amd64"}
-SUFFIX=""
-[ "${ARCH}" != "amd64" ] && SUFFIX="_${ARCH}"
-
 cd $(dirname $0)/..
 
-TAG=${TAG:-${VERSION}${SUFFIX}}
-REPO=${REPO:-yasker}
+command -v buildx >/dev/null && BUILD_CMD=(buildx) || BUILD_CMD=(docker buildx)
 
-if echo $TAG | grep -q dirty; then
-    TAG=dev
+# read configurable parameters
+REPO=${REPO:-longhornio}
+IMAGE_NAME=${IMAGE_NAME:-'kbench'}
+TAG=${TAG:-${VERSION}}
+PUSH=${PUSH:-'false'}
+IS_SECURE=${IS_SECURE:-'false'}
+MACHINE=${MACHINE:-''}
+TARGET_PLATFORMS=${TARGET_PLATFORMS:-''}
+IID_FILE=${IID_FILE:-''}
+IID_FILE_FLAG=${IID_FILE_FLAG:-''}
+
+IMAGE="${REPO}/${IMAGE_NAME}:${TAG}"
+
+BUILDER_ARGS=()
+[[ ${MACHINE} ]] && BUILDER_ARGS+=('--builder' "${MACHINE}")
+
+IFS=' ' read -r -a IID_FILE_ARGS <<<"${IID_FILE_FLAG}"
+[[ -n "${IID_FILE}" && ${#IID_FILE_ARGS} == 0 ]] && IID_FILE_ARGS=('--iidfile' "${IID_FILE}")
+
+BUILDX_ARGS=()
+
+if [[ "${PUSH}" == 'true' ]]; then
+    BUILDX_ARGS+=('--push')
+else
+    BUILDX_ARGS+=('--load')
 fi
 
-IMAGE=${REPO}/kbench:${TAG}
-docker build -t ${IMAGE} -f package/Dockerfile .
-echo Built ${IMAGE}
+[[ ${IS_SECURE} == 'true' ]] && BUILDX_ARGS+=('--sbom=true' '--attest' 'type=provenance,mode=max')
+[[ ${TARGET_PLATFORMS} ]] && BUILDX_ARGS+=('--platform' "${TARGET_PLATFORMS}")
+
+# update base IMAGE to get latest changes
+grep 'FROM.*/' package/Dockerfile | awk '{print $2}' | while read -r BASE_IMAGE
+do
+    docker pull "${BASE_IMAGE}"
+done
+
+IMAGE_BUILD_CMD_ARGS=(
+    build --no-cache \
+    "${BUILDER_ARGS[@]}" \
+    "${IID_FILE_ARGS[@]}" \
+    "${BUILDX_ARGS[@]}" \
+    -t "${IMAGE}" -f package/Dockerfile .
+)
+echo "${BUILD_CMD[@]}" "${IMAGE_BUILD_CMD_ARGS[@]}"
+"${BUILD_CMD[@]}" "${IMAGE_BUILD_CMD_ARGS[@]}"
+
+echo "Built ${IMAGE}"
+
+mkdir -p ./bin
+echo "${IMAGE}" > ./bin/latest_image
