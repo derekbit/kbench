@@ -1,23 +1,24 @@
-TARGETS := $(shell ls scripts)
+MACHINE := longhorn
 
-.dapper:
-	@echo Downloading dapper
-	@curl -sL https://releases.rancher.com/dapper/latest/dapper-`uname -s`-`uname -m` > .dapper.tmp
-	@@chmod +x .dapper.tmp
-	@./.dapper.tmp -v
-	@mv .dapper.tmp .dapper
+.PHONY: build validate ci package clean
 
-$(TARGETS): .dapper
-	./.dapper $@
+buildx-machine:
+	@docker buildx create --name=$(MACHINE) 2>/dev/null || true
 
-deps: .dapper
-	./.dapper -m bind env GO111MODULE=on go mod vendor
-	./.dapper -m bind chown -R $$(id -u) vendor dist bin go.mod go.sum .cache
+build: buildx-machine
+	docker buildx build --builder=$(MACHINE) --target build-artifacts --output type=local,dest=. -f Dockerfile .
+
+validate:
+	docker buildx build --target validate -f Dockerfile .
+
+ci: buildx-machine
+	docker buildx build --builder=$(MACHINE) --target ci-artifacts --output type=local,dest=. -f Dockerfile .
+
+package: build
+	./scripts/package
 
 clean:
 	rm -rf bin dist
 
 .DEFAULT_GOAL := ci
-
-.PHONY: $(TARGETS)
 
