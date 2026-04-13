@@ -39,6 +39,12 @@ jobs:
     - name: Run ci
       run: make ci
 
+    - name: Upload binaries
+      uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4
+      with:
+        name: binaries_artifact
+        path: ./bin/*
+
   build_push_image:
     name: Build and push image
     runs-on: ubuntu-latest
@@ -47,6 +53,15 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+    - name: Download binaries
+      uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4
+      with:
+        name: binaries_artifact
+        path: ./bin/
+
+    - name: Add executable permission
+      run: chmod +x ./bin/*
 
     - name: Login to Docker Hub
       uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
