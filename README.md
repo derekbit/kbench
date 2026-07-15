@@ -93,6 +93,21 @@ Each benchmark category uses a fixed fio workload profile. The parameters below 
 
 Common settings shared across all workloads (from [`fio/common-include.fio`](./fio/common-include.fio)): `ioengine=libaio`, `direct=1`, `time_based=1`, `ramp_time=60s`, `runtime=60s`, `group_reporting=1`.
 
+#### Overriding the workload parameters
+
+The three parameters above can be overridden per category via environment variables. This is useful for exploring how a storage system behaves under different queue depths or block sizes, but **numbers produced with non-default values are not comparable with numbers produced by the kbench defaults** — treat them as your own custom benchmark, not as a kbench score.
+
+| Env var                                        | Overrides                                             |
+| ---------------------------------------------- | ----------------------------------------------------- |
+| `IOPS_BS` / `IOPS_IODEPTH` / `IOPS_NUMJOBS`    | `bs` / `iodepth` / `numjobs` in `iops-include.fio`    |
+| `BW_BS`   / `BW_IODEPTH`   / `BW_NUMJOBS`      | `bs` / `iodepth` / `numjobs` in `bandwidth-include.fio` |
+| `LAT_BS`  / `LAT_IODEPTH`  / `LAT_NUMJOBS`     | `bs` / `iodepth` / `numjobs` in `lat-include.fio`     |
+
+Notes:
+* Only lines that already exist in the include file are overridden; unset env vars leave the file untouched.
+* For meaningful **latency** measurements, keep `LAT_IODEPTH=1` and `LAT_NUMJOBS=1`. Anything larger measures queuing latency, not per-op latency.
+* The Kubernetes manifests ([`deploy/fio.yaml`](./deploy/fio.yaml), [`deploy/fio-cmp.yaml`](./deploy/fio-cmp.yaml)) already set all nine variables to their default values, so all knobs are visible in one place.
+
 ### Understanding the result of a distributed storage system
 
 For a distributed storage system, you always need to test the local storage first as a baseline.
