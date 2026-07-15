@@ -6,12 +6,13 @@ Various benchmark for storage and Kubernetes.
 
 ### Example Result of Single Volume Benchmark
 ```
-=====================
+=========================
 FIO Benchmark Summary
 For: test_device
-SIZE: 50G
-QUICK MODE: DISABLED
-=====================
+CPU Idleness Profiling: enabled
+Size: 50G
+Mode: full
+=========================
 IOPS (Read/Write)
         Random:            98368 / 89200
   CPU Idleness:                      68%
@@ -54,6 +55,14 @@ For official benchmarking:
 1. If you're testing a distributed storage solution like Longhorn, always **test against the local storage first** to know what's the baseline.
     * You can install a storage provider for local storage like [Local Path Provisioner](https://github.com/rancher/local-path-provisioner) for this test if you're testing with Kubernetes.
 1. `CPU_IDLE_PROF` environmental variable: the CPU idleness profiling measures the CPU idleness, but it introduces extra overhead and reduces the storage performance. By default, the flag is disabled.
+1. `MODE` environmental variable: selects which benchmark workloads to run. Defaults to `full`. Supported values:
+    * `full` — run all IOPS, bandwidth, and latency workloads (default, recommended for official benchmarking).
+    * `quick` — a short-running debug mode; not suitable for reporting numbers.
+    * `random-read-iops` / `random-write-iops` — run only the corresponding random small-block IOPS workload.
+    * `sequential-read-bandwidth` / `sequential-write-bandwidth` — run only the corresponding sequential large-block bandwidth workload.
+    * `random-read-latency` / `random-write-latency` — run only the corresponding random single-queue latency workload.
+
+    Note: the legacy `QUICK_MODE` variable is deprecated; use `MODE="quick"` instead.
 
 ### Understanding the result
 * **IOPS**: IO operations per second. *Higher is better.*
@@ -71,6 +80,18 @@ For official benchmarking:
     * For **IOPS, Bandwidth, CPU Idleness**, positive percentage is better.
     * For **Latency**, negative percentage is better.
     * For **CPU Idleness**, instead of showing the percentage of the change, we are showing the difference.
+
+### Workload parameters
+
+Each benchmark category uses a fixed fio workload profile. The parameters below are the ones that most directly define what each number means; see the corresponding `fio/*-include.fio` for the full definition.
+
+| Category  | Block size | I/O depth | Jobs | Access pattern             | Source                                                     |
+| --------- | ---------- | --------- | ---- | -------------------------- | ---------------------------------------------------------- |
+| IOPS      | 4K         | 128       | 8    | Random read / random write | [`fio/iops-include.fio`](./fio/iops-include.fio)           |
+| Bandwidth | 128K       | 16        | 4    | Sequential read / write    | [`fio/bandwidth-include.fio`](./fio/bandwidth-include.fio) |
+| Latency   | 4K         | 1         | 1    | Random read / random write | [`fio/lat-include.fio`](./fio/lat-include.fio)             |
+
+Common settings shared across all workloads (from [`fio/common-include.fio`](./fio/common-include.fio)): `ioengine=libaio`, `direct=1`, `time_based=1`, `ramp_time=60s`, `runtime=60s`, `group_reporting=1`.
 
 ### Understanding the result of a distributed storage system
 
