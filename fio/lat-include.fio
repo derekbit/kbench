@@ -1,2 +1,3 @@
 bs=4k
 iodepth=1
+numjobs=1
