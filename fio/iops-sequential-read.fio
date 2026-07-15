@@ -1,4 +1,0 @@
-[seq-read-iops]
-readwrite=read
-include iops-include.fio
-include common-include.fio
