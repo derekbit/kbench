@@ -5,7 +5,7 @@ metadata:
 spec:
   volumeMode: Filesystem
   #volumeMode: Block
-  #storageClassName: longhorn  # replace with your storage class
+  #$storageClassName: longhorn  # replace with your storage class
   #storageClassName: local-path
   accessModes:
     - ReadWriteOnce
@@ -50,6 +50,26 @@ spec:
           value: "30G" # must be 10% smaller than the PVC size due to filesystem also took space
         - name: CPU_IDLE_PROF
           value: "disabled" # must be "enabled" or "disabled"
+        # Per-category workload parameters. Changing these makes the
+        # results non-comparable with the kbench defaults.
+        - name: IOPS_BS         # default 4K   (fio/iops-include.fio)
+          value: "4K"
+        - name: IOPS_IODEPTH    # default 128
+          value: "128"
+        - name: IOPS_NUMJOBS    # default 8
+          value: "8"
+        - name: BW_BS           # default 128K (fio/bandwidth-include.fio)
+          value: "128K"
+        - name: BW_IODEPTH      # default 16
+          value: "16"
+        - name: BW_NUMJOBS      # default 4
+          value: "4"
+        - name: LAT_BS          # default 4K   (fio/lat-include.fio)
+          value: "4K"
+        - name: LAT_IODEPTH     # default 1    (must stay 1 for meaningful latency)
+          value: "1"
+        - name: LAT_NUMJOBS     # default 1    (must stay 1 for meaningful latency)
+          value: "1"
         volumeMounts:
         - name: vol
           mountPath: /volume/

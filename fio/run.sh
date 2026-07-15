@@ -110,6 +110,38 @@ else
     rate_flag=""
 fi
 
+# Apply per-category workload parameter overrides (bs / iodepth / numjobs)
+# by rewriting the corresponding include file in place. Only lines that
+# already exist are updated; missing keys are left untouched.
+#
+# Env vars:
+#   IOPS_BS / IOPS_IODEPTH / IOPS_NUMJOBS   -> iops-include.fio
+#   BW_BS   / BW_IODEPTH   / BW_NUMJOBS     -> bandwidth-include.fio
+#   LAT_BS  / LAT_IODEPTH  / LAT_NUMJOBS    -> lat-include.fio
+apply_override() {
+    local include_file=$1
+    local bs_val=$2
+    local iodepth_val=$3
+    local numjobs_val=$4
+
+    if [ -n "$bs_val" ]; then
+        sed -i "s|^bs=.*|bs=$bs_val|" "$include_file"
+        echo "Override: $(basename "$include_file") bs=$bs_val"
+    fi
+    if [ -n "$iodepth_val" ]; then
+        sed -i "s|^iodepth=.*|iodepth=$iodepth_val|" "$include_file"
+        echo "Override: $(basename "$include_file") iodepth=$iodepth_val"
+    fi
+    if [ -n "$numjobs_val" ]; then
+        sed -i "s|^numjobs=.*|numjobs=$numjobs_val|" "$include_file"
+        echo "Override: $(basename "$include_file") numjobs=$numjobs_val"
+    fi
+}
+
+apply_override "$CURRENT_DIR/iops-include.fio"      "$IOPS_BS" "$IOPS_IODEPTH" "$IOPS_NUMJOBS"
+apply_override "$CURRENT_DIR/bandwidth-include.fio" "$BW_BS"   "$BW_IODEPTH"   "$BW_NUMJOBS"
+apply_override "$CURRENT_DIR/lat-include.fio"       "$LAT_BS"  "$LAT_IODEPTH"  "$LAT_NUMJOBS"
+
 
 TEMP=./temp
 OUTPUT_READ_IOPS=${TEST_OUTPUT}-read-iops.json
